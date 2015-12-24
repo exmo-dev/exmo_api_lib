@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Exmo API jquery</title>
+    <div id="result">
+    </div>
+</head>
+<body>
+
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="bower_components/crypto-js/crypto-js.js"></script>
+<script type="text/javascript">
+    var config = {
+        url: 'https://api.exmo.com/v1/',
+        key:'your_key',
+        secret:'your_secret'
+    };
+
+    function init() {
+        config.nonce = new Date().getTime();
+    }
+
+    function sign(message){
+        return CryptoJS.HmacSHA512(message, config.secret).toString(CryptoJS.enc.hex);
+    }
+
+    function api_query(method_name, data, callback){
+        data.nonce = config.nonce++;
+        var post_data = $.param( data );
+        $.ajax({
+            url: config.url + method_name,
+            type: 'post',
+            data: data,
+            headers: {
+                Key:  config.key,
+                Sign: sign(post_data)
+            },
+            dataType: 'json',
+            success: function (data) {
+                callback(data);
+            }
+        });
+    }
+
+    $( document ).ready(function() {
+        init();
+        api_query("user_info", {}, function(data){
+            console.log(data);
+            $( "#result" ).append( "<p>"+JSON.stringify(data)+"</p>" );
+            api_query("user_cancelled_orders", {limit:100, offset:0}, function(data){
+              console.log(data);
+              $( "#result" ).append( "<p>"+JSON.stringify(data)+"</p>" );
+            });
+        });
+    });
+</script>
+</body>
+</html>
