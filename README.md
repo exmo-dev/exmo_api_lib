@@ -1,1 +1,2 @@
-# exmo_api_lib
+# exmo_api
+Exmo.com API lib
