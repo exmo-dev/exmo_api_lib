@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "exmo_api.hpp"
 #include <iostream>
 
@@ -12,7 +11,6 @@ int main()
 	response = api.call("user_cancelled_orders", api.build({ "limit=100", "offset=0" }));
 	std::clog << ">> user_cancelled_orders: " << response << "\n\n";
 	
-
-    return 0;
+	return 0;
 }
 
