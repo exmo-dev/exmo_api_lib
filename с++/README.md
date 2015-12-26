@@ -1,0 +1,2 @@
+Dependencies: CURL, OpenSSL
+

@@ -1,2 +1,11 @@
-# exmo_api
-Exmo.com API lib
+# exmo.com API
+##API documentation 
+https://exmo.com/api_doc
+
+###Supported languages:
+- php.
+- js.
+- nodejs.
+- c#.
+- c++11.
+- python.
