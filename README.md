@@ -1,5 +1,5 @@
 # exmo.com API
-##API documentation 
+###API documentation 
 https://exmo.com/api_doc
 
 ###Supported languages:
