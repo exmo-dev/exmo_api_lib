@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Exmo API</title>
+    <div id="result"></div>
+</head>
+<body onLoad="window_onload()">
+
+<script src="bower_components/crypto-js/crypto-js.js"></script>
+<script type="text/javascript">
+    "use strict";
+    var config = {
+        url: 'https://api.exmo.com/v1/',
+        key:'your_key',
+        secret:'your_secret'
+    };
+
+    function init() {
+        config.nonce = new Date().getTime();
+    }
+
+    function sign(message){
+        return CryptoJS.HmacSHA512(message, config.secret).toString(CryptoJS.enc.hex);
+    }
+
+    function serialize(obj) {
+        var str = [];
+        for(var p in obj)
+            if (obj.hasOwnProperty(p)) {
+                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+            }
+        return str.join("&");
+    }
+
+
+    function api_query(method_name, data){
+      return new Promise(function(resolve, reject) {
+        data.nonce = config.nonce++;
+        var xhr = new XMLHttpRequest();
+        var post_data = serialize(data);
+
+        xhr.open("POST", config.url + method_name, true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8index.html");
+        xhr.setRequestHeader("Key", config.key);
+        xhr.setRequestHeader("Sign", sign(post_data));
+
+        xhr.onload = function() {
+          if (this.status == 200) {
+            resolve(this.response);
+          } else {
+            var error = new Error(this.statusText);
+            error.code = this.status;
+            reject(error);
+          }
+        };
+
+        xhr.onerror = function() {
+          reject(new Error("Network Error"));
+        };
+
+        xhr.send(post_data);
+      });
+    }
+
+    function window_onload() {
+        init();
+        var div = document.getElementById("result");
+        api_query("user_info", {})
+          .then(response=>{
+            console.log(response);
+            div.innerHTML += '<p>' + JSON.stringify(response)+ '</p>';
+            let data = JSON.parse(response);
+            return data;
+          },
+          error => {
+            console.log(error);
+          })
+          .then(data=>{
+            return api_query("user_cancelled_orders", {limit:100, offset:0});
+          })
+          .then(response=>{
+            console.log(response);
+            div.innerHTML += '<p>' + JSON.stringify(response)+ '</p>';
+          },
+          error=>{
+            console.log(error);
+          });
+    }
+</script>
+</body>
+</html>
