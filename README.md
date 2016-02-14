@@ -9,3 +9,5 @@ https://exmo.com/api_doc
 - c#.
 - c++11.
 - python.
+- objective c.
+- swift.
