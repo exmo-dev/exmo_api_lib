@@ -11,3 +11,4 @@ https://exmo.com/api_doc
 - python.
 - objective c.
 - swift.
+- java.
