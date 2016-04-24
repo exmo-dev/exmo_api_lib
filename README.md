@@ -1,5 +1,5 @@
 # exmo.com API
-###API documentation 
+###API documentation
 https://exmo.com/api_doc
 
 ###Supported languages:
@@ -12,3 +12,4 @@ https://exmo.com/api_doc
 - objective c.
 - swift.
 - java.
+- ruby.
