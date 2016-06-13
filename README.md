@@ -13,3 +13,4 @@ https://exmo.com/api_doc
 - swift.
 - java.
 - ruby.
+- golang.
