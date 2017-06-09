@@ -1,3 +1,4 @@
+import sys
 import http.client
 import urllib
 import json
@@ -17,7 +18,7 @@ class ExmoAPI:
         H.update(data.encode('utf-8'))
         return H.hexdigest()
 
-    def api_query(self, api_method, http_method = "POST", params = {}):
+    def api_query(self, api_method, params = {}):
         params['nonce'] = int(round(time.time() * 1000))
         params =  urllib.parse.urlencode(params)
         
@@ -28,7 +29,7 @@ class ExmoAPI:
             "Sign": sign
         }
         conn = http.client.HTTPSConnection(self.API_URL)
-        conn.request(http_method, "/" + self.API_VERSION + "/" + api_method, params, headers)
+        conn.request("POST", "/" + self.API_VERSION + "/" + api_method, params, headers)
         response = conn.getresponse().read()
         
         conn.close()
@@ -36,10 +37,12 @@ class ExmoAPI:
         try:
             obj = json.loads(response.decode('utf-8'))
             if 'error' in obj and obj['error']:
-                raise ScriptError(obj['error'])
+                print(obj['error'])
+                raise sys.exit()
             return obj
         except json.decoder.JSONDecodeError:
-            raise ScriptError('An error occurred, while parsing response string:', response)
+            print('An error occurred, while parsing response string:', response)
+            raise sys.exit()
 
 # Example
 ExmoAPI_instance = ExmoAPI('YOUR API KEY', 'YOUR API SECRET')
