@@ -21,7 +21,7 @@ class ExmoAPI:
     def api_query(self, api_method, params = {}):
         params['nonce'] = int(round(time.time() * 1000))
         params =  urllib.parse.urlencode(params)
-        
+
         sign = self.sha512(params)
         headers = {
             "Content-type": "application/x-www-form-urlencoded",
@@ -31,7 +31,7 @@ class ExmoAPI:
         conn = http.client.HTTPSConnection(self.API_URL)
         conn.request("POST", "/" + self.API_VERSION + "/" + api_method, params, headers)
         response = conn.getresponse().read()
-        
+
         conn.close()
 
         try:
@@ -41,7 +41,7 @@ class ExmoAPI:
                 raise sys.exit()
             return obj
         except json.decoder.JSONDecodeError:
-            print('An error occurred, while parsing response string:', response)
+            print('Error while parsing response:', response)
             raise sys.exit()
 
 # Example
