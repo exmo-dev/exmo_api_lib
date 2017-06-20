@@ -21,7 +21,7 @@ public class Exmo {
     private String _secret;
 
     public Exmo(String key, String secret) {
-        _nonce = System.nanoTime();
+        _nonce = System.currentTimeMillis();
         _key = key;
         _secret = secret;
     }
