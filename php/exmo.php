@@ -4,8 +4,8 @@ function api_query($api_name, array $req = array())
     $NONCE = $mt[1] . substr($mt[0], 2, 6);
 
     // API settings
-    $key = ""; //TODO replace with your api key from profile page
-    $secret = ""; //TODO replace with your api secret from profile page
+    $key = "K-c8e39f2516b19586214b02c3ce4ab70981e1d7b9"; //TODO replace with your api key from profile page
+    $secret = "S-6f4f6576f90814edfc0cc14f5ec6dc5c55a45af1"; //TODO replace with your api secret from profile page
 
     $url = "http://api.exmo.com/v1/$api_name";
 
