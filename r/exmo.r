@@ -8,6 +8,7 @@ api_key <- "K-..."
 api_secret <- "S-..."
 
 api_query <- function(url, key, secret){
+	
 	nonce <- (as.numeric(as.POSIXct(Sys.time()))*10000000)%/%1
 
 	body <- 
@@ -23,7 +24,7 @@ api_query <- function(url, key, secret){
 			object 	= data, 
 			algo 	= "sha512" 
 		)
-	body
+	
 	responce <- POST( 
 		url  = url,
 		accept_json(),
@@ -32,8 +33,7 @@ api_query <- function(url, key, secret){
 			"Sign" = signature,
 			"Content-Type" = "application/x-www-form-urlencoded"
 		),
-		body = data,
-		verbose()
+		body = data
 	)
 
 	exmo_content <- content(responce, as="text")# 
