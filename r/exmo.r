@@ -3,20 +3,17 @@ library(jsonlite)
 library(nanotime)
 library(digest)
 
-api_url <- "https://api.exmo.com/v1/user_info/"
+api_url <- "https://api.exmo.com/v1/"
 api_key <- "K-..."
 api_secret <- "S-..."
 
-api_query <- function(url, key, secret){
+api_query <- function(method, key, secret, params = list()){
 	
 	nonce <- (as.numeric(as.POSIXct(Sys.time()))*10000000)%/%1
-
-	body <- 
-		list(
-			nonce = nonce
-		)
-
-	data <- paste(names(body), body, sep = "=", collapse = "&")
+	
+	params <- c(params, nonce = nonce)
+	
+	data <- paste(names(params), params, sep = "=", collapse = "&")
 
 	signature <- 
 		hmac( 
@@ -26,7 +23,7 @@ api_query <- function(url, key, secret){
 		)
 	
 	responce <- POST( 
-		url  = url,
+		url  = paste(api_url, method, sep = ""),
 		accept_json(),
 		add_headers(
 			"Key" = key, 
@@ -41,4 +38,12 @@ api_query <- function(url, key, secret){
 	return(json_exmo_content)
 }
 
-api_query(api_url, api_key, api_secret)
+params <- list(
+	pair 	= "ETH_BTC",
+	limit 	= 100,
+	offset 	= 0
+
+)
+
+api_query("user_trades", api_key, api_secret, params)
+api_query("user_info", api_key, api_secret)
