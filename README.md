@@ -14,3 +14,4 @@ https://exmo.com/api_doc
 - java.
 - ruby.
 - golang.
+- R.
