@@ -16,7 +16,7 @@ func TestApi_query(t *testing.T) {
 		fmt.Printf("-------------\n")
 		result, err := lib.GetUserInfo(key, secret)
 		if err != nil {
-			fmt.Printf("api error: %s\n", err.Error())
+			t.Errorf("api error: %s\n", err.Error())
 		} else {
 			fmt.Println("api result:")
 			for key, value := range result {
@@ -40,9 +40,9 @@ func TestApi_query(t *testing.T) {
 	t.Run("Get user trades", func(t *testing.T) {
 		fmt.Printf("-------------\n")
 
-		usertrades, err1 := lib.GetUserTrades(key, secret, lib.ApiParams{"pair": "BTC_RUB"})
+		usertrades, err1 := lib.GetUserTrades(key, secret, "BTC_RUB")
 		if err1 != nil {
-			fmt.Printf("api error: %s\n", err1.Error())
+			t.Errorf("api error: %s\n", err1.Error())
 		} else {
 			fmt.Println("User trades")
 			for pair, val := range usertrades {
@@ -52,6 +52,26 @@ func TestApi_query(t *testing.T) {
 					for k, v := range interfacevalue.(map[string]interface{}) {
 						fmt.Println(k, v)
 					}
+				}
+			}
+		}
+	})
+
+	t.Run("Buy BTC", func(t *testing.T) {
+		order, errOrder := lib.Buy(key, secret, "BTC_RUB", "0.001", "664096.72")
+		if errOrder != nil {
+			t.Errorf("api error: %s\n", errOrder.Error())
+		} else {
+			fmt.Println("Creating order...")
+			for key, value := range order {
+				if key == "result" && value != true {
+					fmt.Println("\nError")
+				}
+				if key == "error" && value != "" {
+					fmt.Println(value)
+				}
+				if key == "order_id" && value != nil {
+					fmt.Printf("Order id: %f", value.(float64))
 				}
 			}
 		}

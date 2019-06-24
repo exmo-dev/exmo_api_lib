@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/exmo-dev/exmo_api_lib/tree/master/golang/lib"
 )
 
@@ -35,7 +34,7 @@ func main() {
 
 	fmt.Printf("-------------\n")
 
-	usertrades, err1 := lib.GetUserTrades(key, secret, lib.ApiParams{"pair": "BTC_RUB"})
+	usertrades, err1 := lib.GetUserTrades(key, secret, "BTC_RUB")
 	if err1 != nil {
 		fmt.Printf("api error: %s\n", err1.Error())
 	} else {
@@ -47,6 +46,24 @@ func main() {
 				for k, v := range interfacevalue.(map[string]interface{}) {
 					fmt.Println(k, v)
 				}
+			}
+		}
+	}
+
+	order, errOrder := lib.Buy(key, secret, "BTC_RUB", "0.001", "664096.72")
+	if errOrder != nil {
+		fmt.Printf("api error: %s\n", errOrder.Error())
+	} else {
+		fmt.Println("Creating order...")
+		for key, value := range order {
+			if key == "result" && value != true {
+				fmt.Println("\nError")
+			}
+			if key == "error" && value != "" {
+				fmt.Println(value)
+			}
+			if key == "order_id" && value != nil {
+				fmt.Printf("Order id: %f", value.(float64))
 			}
 		}
 	}

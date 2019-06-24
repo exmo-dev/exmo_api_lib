@@ -84,8 +84,24 @@ func GetUserInfo(key string, secret string) (response ApiResponse, err error) {
 	return
 }
 
-func GetUserTrades(key string, secret string, params ApiParams) (response ApiResponse, err error) {
-	response, err = Api_query(key, secret, "user_trades", params)
+func GetUserTrades(key string, secret string, pair string) (response ApiResponse, err error) {
+	response, err = Api_query(key, secret, "user_trades", ApiParams{"pair": pair})
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}
+
+func OrderCreate(key string, secret string, pair string, quantity string, price string, typeOrder string) (response ApiResponse, err error) {
+	response, err = Api_query(key, secret, "order_create", ApiParams{"pair": pair, "quantity": quantity, "price": price, "type": typeOrder})
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}
+
+func Buy(key string, secret string, pair string, quantity string, price string) (response ApiResponse, err error) {
+	response, err = OrderCreate(key, secret, pair, quantity, price, "buy")
 	if err != nil {
 		fmt.Printf("api error: %s\n", err.Error())
 	}
