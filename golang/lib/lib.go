@@ -74,3 +74,20 @@ func Do_sign(message string, secret string) string {
 	mac.Write([]byte(message))
 	return fmt.Sprintf("%x", mac.Sum(nil))
 }
+
+// Get info about user account
+func GetUserInfo(key string, secret string) (response ApiResponse, err error) {
+	response, err = Api_query(key, secret, "user_info", nil)
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}
+
+func GetUserTrades(key string, secret string, params ApiParams) (response ApiResponse, err error) {
+	response, err = Api_query(key, secret, "user_trades", params)
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}

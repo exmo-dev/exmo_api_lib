@@ -11,7 +11,7 @@ func main() {
 	key := ""    // TODO replace with your api key from profile page
 	secret := "" // TODO replace with your api secret from profile page
 
-	result, err := lib.Api_query(key, secret, "user_info", nil)
+	result, err := lib.GetUserInfo(key, secret)
 	if err != nil {
 		fmt.Printf("api error: %s\n", err.Error())
 	} else {
@@ -35,7 +35,7 @@ func main() {
 
 	fmt.Printf("-------------\n")
 
-	usertrades, err1 := lib.Api_query(key, secret, "user_trades", lib.ApiParams{"pair": "BTC_RUB"})
+	usertrades, err1 := lib.GetUserTrades(key, secret, lib.ApiParams{"pair": "BTC_RUB"})
 	if err1 != nil {
 		fmt.Printf("api error: %s\n", err1.Error())
 	} else {
