@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/exmo-dev/exmo_api_lib/tree/master/golang/lib"
+	"github.com/exmo-dev/exmo_api_lib/tree/master/golang/exmo"
 )
 
 func main() {
@@ -10,7 +10,9 @@ func main() {
 	key := ""    // TODO replace with your api key from profile page
 	secret := "" // TODO replace with your api secret from profile page
 
-	result, err := lib.GetUserInfo(key, secret)
+	api := exmo.Api(key, secret)
+
+	result, err := api.GetUserInfo()
 	if err != nil {
 		fmt.Printf("api error: %s\n", err.Error())
 	} else {
@@ -34,7 +36,7 @@ func main() {
 
 	fmt.Printf("-------------\n")
 
-	usertrades, err1 := lib.GetUserTrades(key, secret, "BTC_RUB")
+	usertrades, err1 := api.GetUserTrades("BTC_RUB")
 	if err1 != nil {
 		fmt.Printf("api error: %s\n", err1.Error())
 	} else {
@@ -50,7 +52,7 @@ func main() {
 		}
 	}
 
-	order, errOrder := lib.Buy(key, secret, "BTC_RUB", "0.001", "664096.72")
+	order, errOrder := api.Buy("BTC_RUB", "0.001", "664096.72")
 	if errOrder != nil {
 		fmt.Printf("api error: %s\n", errOrder.Error())
 	} else {
