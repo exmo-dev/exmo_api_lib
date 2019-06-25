@@ -1,4 +1,5 @@
-**Usage** 
+**Usage**                          
+
 Import package into your code:                      
 
     import "github.com/exmo-dev/exmo_api_lib/tree/master/golang/exmo"
