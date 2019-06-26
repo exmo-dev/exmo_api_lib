@@ -59,8 +59,68 @@ func TestApi_query(t *testing.T) {
 		}
 	})
 
-	t.Run("Buy BTC", func(t *testing.T) {
+	t.Run("Buy BTC (custom price)", func(t *testing.T) {
 		order, errOrder := api.Buy("BTC_RUB", "0.001", "664096.72")
+		if errOrder != nil {
+			t.Errorf("api error: %s\n", errOrder.Error())
+		} else {
+			fmt.Println("Creating order...")
+			for key, value := range order {
+				if key == "result" && value != true {
+					fmt.Println("\nError")
+				}
+				if key == "error" && value != "" {
+					fmt.Println(value)
+				}
+				if key == "order_id" && value != nil {
+					fmt.Printf("Order id: %f", value.(float64))
+				}
+			}
+		}
+	})
+
+	t.Run("Buy BTC (market price)", func(t *testing.T) {
+		order, errOrder := api.MarketBuy("BTC_RUB", "0.001")
+		if errOrder != nil {
+			t.Errorf("api error: %s\n", errOrder.Error())
+		} else {
+			fmt.Println("Creating order...")
+			for key, value := range order {
+				if key == "result" && value != true {
+					fmt.Println("\nError")
+				}
+				if key == "error" && value != "" {
+					fmt.Println(value)
+				}
+				if key == "order_id" && value != nil {
+					fmt.Printf("Order id: %f", value.(float64))
+				}
+			}
+		}
+	})
+
+	t.Run("Sell BTC (custom price)", func(t *testing.T) {
+		order, errOrder := api.Sell("BTC_RUB", "0.001", "800000")
+		if errOrder != nil {
+			t.Errorf("api error: %s\n", errOrder.Error())
+		} else {
+			fmt.Println("Creating order...")
+			for key, value := range order {
+				if key == "result" && value != true {
+					fmt.Println("\nError")
+				}
+				if key == "error" && value != "" {
+					fmt.Println(value)
+				}
+				if key == "order_id" && value != nil {
+					fmt.Printf("Order id: %f", value.(float64))
+				}
+			}
+		}
+	})
+
+	t.Run("Sell BTC (market price)", func(t *testing.T) {
+		order, errOrder := api.MarketSell("BTC_RUB", "0.001")
 		if errOrder != nil {
 			t.Errorf("api error: %s\n", errOrder.Error())
 		} else {

@@ -116,3 +116,27 @@ func (ex *Exmo) Buy(pair string, quantity string, price string) (response ApiRes
 	}
 	return
 }
+
+func (ex *Exmo) Sell(pair string, quantity string, price string) (response ApiResponse, err error) {
+	response, err = ex.OrderCreate(pair, quantity, price, "sell")
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}
+
+func (ex *Exmo) MarketBuy(pair string, quantity string) (response ApiResponse, err error) {
+	response, err = ex.OrderCreate(pair, quantity, "0", "market_buy")
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}
+
+func (ex *Exmo) MarketSell(pair string, quantity string) (response ApiResponse, err error) {
+	response, err = ex.OrderCreate(pair, quantity, "0", "market_sell")
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}
