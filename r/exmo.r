@@ -22,7 +22,7 @@ api_query <- function(method, key, secret, params = list()){
 			algo 	= "sha512" 
 		)
 	
-	responce <- POST( 
+	response <- POST( 
 		url  = paste(api_url, method, sep = ""),
 		accept_json(),
 		add_headers(
@@ -33,7 +33,7 @@ api_query <- function(method, key, secret, params = list()){
 		body = data
 	)
 
-	exmo_content <- content(responce, as="text")# 
+	exmo_content <- content(response, as="text")
 	json_exmo_content <- fromJSON(exmo_content)
 	return(json_exmo_content)
 }
