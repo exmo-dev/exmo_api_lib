@@ -15,3 +15,4 @@ Now you can use api features, for example:
     result, err := api.GetUserInfo()
     ...
     order, errOrder := api.Buy("BTC_RUB", "0.001", "664096.72")
+    

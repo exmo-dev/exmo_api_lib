@@ -3,7 +3,9 @@ package exmo
 import (
 	"fmt"
 	"github.com/exmo-dev/exmo_api_lib/tree/master/golang/exmo"
+	"math/big"
 	"testing"
+	"time"
 )
 
 func TestApi_query(t *testing.T) {
@@ -14,13 +16,39 @@ func TestApi_query(t *testing.T) {
 
 	api := exmo.Api(key, secret)
 
+	t.Run("Get trades", func(t *testing.T) {
+		result, err := api.GetTrades("BTC_RUB")
+		if err != nil {
+			fmt.Errorf("api error: %s\n", err.Error())
+		} else {
+			for _, v := range result {
+				for k, val := range v.([]interface{}) {
+					tmpindex := 0
+					for key, value := range val.(map[string]interface{}) {
+						if tmpindex != k {
+							fmt.Printf("\n\nindex: %d \n", k)
+							tmpindex = k
+						}
+						if key == "trade_id" {
+							fmt.Println(key, big.NewFloat(value.(float64)).String())
+						} else if key == "date" {
+							fmt.Println(key, time.Unix(int64(value.(float64)), 0))
+						} else {
+							fmt.Println(key, value)
+						}
+					}
+				}
+			}
+
+		}
+	})
+
 	t.Run("Get user info", func(t *testing.T) {
 		fmt.Printf("-------------\n")
 		result, err := api.GetUserInfo()
 		if err != nil {
 			t.Errorf("api error: %s\n", err.Error())
 		} else {
-			fmt.Println("api result:")
 			for key, value := range result {
 				if key == "balances" {
 					fmt.Println("\n-- balances:")

@@ -26,10 +26,12 @@ func Api(key string, secret string) Exmo {
 	return Exmo{key, secret}
 }
 
-func (ex *Exmo) Api_query(method string, params ApiParams) (ApiResponse, error) {
+func (ex *Exmo) Api_query(mode string, method string, params ApiParams) (ApiResponse, error) {
 
 	post_params := url.Values{}
-	post_params.Add("nonce", nonce())
+	if mode == "authenticated" {
+		post_params.Add("nonce", nonce())
+	}
 	if params != nil {
 		for key, value := range params {
 			post_params.Add(key, value)
@@ -84,9 +86,18 @@ func (ex *Exmo) Do_sign(message string) string {
 	return fmt.Sprintf("%x", mac.Sum(nil))
 }
 
+// Get all trades
+func (ex *Exmo) GetTrades(pair string) (response ApiResponse, err error) {
+	response, err = ex.Api_query("authenticated", "trades", ApiParams{"pair": pair})
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}
+
 // Get info about user account
 func (ex *Exmo) GetUserInfo() (response ApiResponse, err error) {
-	response, err = ex.Api_query("user_info", nil)
+	response, err = ex.Api_query("authenticated", "user_info", nil)
 	if err != nil {
 		fmt.Printf("api error: %s\n", err.Error())
 	}
@@ -94,7 +105,7 @@ func (ex *Exmo) GetUserInfo() (response ApiResponse, err error) {
 }
 
 func (ex *Exmo) GetUserTrades(pair string) (response ApiResponse, err error) {
-	response, err = ex.Api_query("user_trades", ApiParams{"pair": pair})
+	response, err = ex.Api_query("authenticated", "user_trades", ApiParams{"pair": pair})
 	if err != nil {
 		fmt.Printf("api error: %s\n", err.Error())
 	}
@@ -102,7 +113,7 @@ func (ex *Exmo) GetUserTrades(pair string) (response ApiResponse, err error) {
 }
 
 func (ex *Exmo) OrderCreate(pair string, quantity string, price string, typeOrder string) (response ApiResponse, err error) {
-	response, err = ex.Api_query("order_create", ApiParams{"pair": pair, "quantity": quantity, "price": price, "type": typeOrder})
+	response, err = ex.Api_query("authenticated", "order_create", ApiParams{"pair": pair, "quantity": quantity, "price": price, "type": typeOrder})
 	if err != nil {
 		fmt.Printf("api error: %s\n", err.Error())
 	}
