@@ -88,9 +88,24 @@ func (ex *Exmo) Do_sign(message string) string {
 
 // Get all trades
 func (ex *Exmo) GetTrades(pair string) (response ApiResponse, err error) {
-	response, err = ex.Api_query("authenticated", "trades", ApiParams{"pair": pair})
+	response, err = ex.Api_query("public", "trades", ApiParams{"pair": pair})
 	if err != nil {
 		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}
+
+func (ex *Exmo) GetOrderBook(pair string, limit int) (response ApiResponse, err error) {
+	if limit < 100 || limit > 1000 {
+		fmt.Printf("limit param must be in range of 100-1000")
+		response = nil
+		err = errors.New("limit param must be in range of 100-1000")
+
+	} else {
+		response, err = ex.Api_query("public", "order_book", ApiParams{"pair": pair, "limit": string(limit)})
+		if err != nil {
+			fmt.Printf("api error: %s\n", err.Error())
+		}
 	}
 	return
 }

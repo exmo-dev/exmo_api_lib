@@ -14,11 +14,11 @@ func main() {
 
 	api := exmo.Api(key, secret)
 
-	result, err := api.GetTrades("BTC_RUB")
-	if err != nil {
-		fmt.Errorf("api error: %s\n", err.Error())
+	resultTrades, errTrades := api.GetTrades("BTC_RUB")
+	if errTrades != nil {
+		fmt.Errorf("api error: %s\n", errTrades.Error())
 	} else {
-		for _, v := range result {
+		for _, v := range resultTrades {
 			for k, val := range v.([]interface{}) {
 				tmpindex := 0
 				for key, value := range val.(map[string]interface{}) {
@@ -36,15 +36,43 @@ func main() {
 				}
 			}
 		}
-
 	}
 
-	result, err := api.GetUserInfo()
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
+	resultBook, errBook := api.GetOrderBook("BTC_RUB", 200)
+	if errBook != nil {
+		fmt.Errorf("api error: %s\n", errBook.Error())
+	} else {
+		for _, v := range resultBook {
+			for key, value := range v.(map[string]interface{}) {
+				if key == "bid" || key == "ask" {
+					for _, val := range value.([]interface{}) {
+						fmt.Printf("%s: ", key)
+						for index, valnested := range val.([]interface{}) {
+							switch index {
+							case 0:
+								fmt.Printf("price %s, ", valnested.(string))
+
+							case 1:
+								fmt.Printf("quantity %s, ", valnested.(string))
+							case 2:
+								fmt.Printf("total %s \n", valnested.(string))
+							}
+						}
+					}
+				} else {
+					fmt.Println(key, value)
+				}
+			}
+
+		}
+	}
+
+	resultUserInfo, errUserInfo := api.GetUserInfo()
+	if errUserInfo != nil {
+		fmt.Printf("api error: %s\n", errUserInfo.Error())
 	} else {
 		fmt.Println("api result:")
-		for key, value := range result {
+		for key, value := range resultUserInfo {
 			if key == "balances" {
 				fmt.Println("\n-- balances:")
 				for k, v := range value.(map[string]interface{}) {
@@ -97,12 +125,12 @@ func main() {
 		}
 	}
 
-	order, errOrder := api.MarketBuy("BTC_RUB", "0.001")
-	if errOrder != nil {
-		fmt.Printf("api error: %s\n", errOrder.Error())
+	marketOrder, errMarketOrder := api.MarketBuy("BTC_RUB", "0.001")
+	if errMarketOrder != nil {
+		fmt.Printf("api error: %s\n", errMarketOrder.Error())
 	} else {
 		fmt.Println("Creating order...")
-		for key, value := range order {
+		for key, value := range marketOrder {
 			if key == "result" && value != true {
 				fmt.Println("\nError")
 			}

@@ -43,6 +43,38 @@ func TestApi_query(t *testing.T) {
 		}
 	})
 
+	t.Run("Get order book", func(t *testing.T) {
+		result, err := api.GetOrderBook("BTC_RUB", 200)
+		if err != nil {
+			t.Errorf("api error: %s\n", err.Error())
+		} else {
+			for _, v := range result {
+
+				for key, value := range v.(map[string]interface{}) {
+					if key == "bid" || key == "ask" {
+						for _, val := range value.([]interface{}) {
+							fmt.Printf("%s: ", key)
+							for index, valnested := range val.([]interface{}) {
+								switch index {
+								case 0:
+									fmt.Printf("price %s, ", valnested.(string))
+
+								case 1:
+									fmt.Printf("quantity %s, ", valnested.(string))
+								case 2:
+									fmt.Printf("total %s \n", valnested.(string))
+								}
+							}
+						}
+					} else {
+						fmt.Println(key, value)
+					}
+				}
+
+			}
+		}
+	})
+
 	t.Run("Get user info", func(t *testing.T) {
 		fmt.Printf("-------------\n")
 		result, err := api.GetUserInfo()
