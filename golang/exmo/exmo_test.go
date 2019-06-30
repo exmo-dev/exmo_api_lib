@@ -75,6 +75,20 @@ func TestApi_query(t *testing.T) {
 		}
 	})
 
+	t.Run("Get ticker", func(t *testing.T) {
+		ticker, errTicker := api.Ticker()
+		if errTicker != nil {
+			t.Errorf("api error: %s\n", errTicker.Error())
+		} else {
+			for pair, pairvalue := range ticker {
+				fmt.Printf("\n\n%s:\n", pair)
+				for key, value := range pairvalue.(map[string]interface{}) {
+					fmt.Println(key, value)
+				}
+			}
+		}
+	})
+
 	t.Run("Get user info", func(t *testing.T) {
 		fmt.Printf("-------------\n")
 		result, err := api.GetUserInfo()

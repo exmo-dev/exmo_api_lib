@@ -67,11 +67,22 @@ func main() {
 		}
 	}
 
+	ticker, errTicker := api.Ticker()
+	if errTicker != nil {
+		fmt.Printf("api error: %s\n", errTicker.Error())
+	} else {
+		for pair, pairvalue := range ticker {
+			fmt.Printf("\n\n%s:\n", pair)
+			for key, value := range pairvalue.(map[string]interface{}) {
+				fmt.Println(key, value)
+			}
+		}
+	}
+
 	resultUserInfo, errUserInfo := api.GetUserInfo()
 	if errUserInfo != nil {
 		fmt.Printf("api error: %s\n", errUserInfo.Error())
 	} else {
-		fmt.Println("api result:")
 		for key, value := range resultUserInfo {
 			if key == "balances" {
 				fmt.Println("\n-- balances:")
