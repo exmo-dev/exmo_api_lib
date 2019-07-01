@@ -126,6 +126,32 @@ func (ex *Exmo) GetPairSettings() (response ApiResponse, err error) {
 	return
 }
 
+func (ex *Exmo) GetCurrency() (response []string, err error) {
+
+	resp, err := http.Get("https://api.exmo.com/v1/currency")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.Status != "200 OK" {
+		return nil, errors.New("http status: " + resp.Status)
+	}
+
+	body, err1 := ioutil.ReadAll(resp.Body)
+	if err1 != nil {
+		return nil, err1
+	}
+
+	var dat []string
+	err2 := json.Unmarshal([]byte(body), &dat)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return dat, nil
+}
+
 // Get info about user account
 func (ex *Exmo) GetUserInfo() (response ApiResponse, err error) {
 	response, err = ex.Api_query("authenticated", "user_info", nil)

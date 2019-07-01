@@ -103,6 +103,18 @@ func TestApi_query(t *testing.T) {
 		}
 	})
 
+	t.Run("Get currencies", func(t *testing.T) {
+		result, err := api.GetCurrency()
+		if err != nil {
+			t.Errorf("api error: %s\n", err.Error())
+		} else {
+			fmt.Println("\nCurrencies:")
+			for _, pair := range result {
+				fmt.Println(pair)
+			}
+		}
+	})
+
 	t.Run("Get user info", func(t *testing.T) {
 		fmt.Printf("-------------\n")
 		result, err := api.GetUserInfo()

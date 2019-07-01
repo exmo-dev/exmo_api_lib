@@ -91,6 +91,16 @@ func main() {
 		}
 	}
 
+	resultCurrency, errCurrency := api.GetCurrency()
+	if errCurrency != nil {
+		fmt.Printf("api error: %s\n", errCurrency.Error())
+	} else {
+		fmt.Println("\nCurrencies:")
+		for _, pair := range resultCurrency {
+			fmt.Println(pair)
+		}
+	}
+
 	resultUserInfo, errUserInfo := api.GetUserInfo()
 	if errUserInfo != nil {
 		fmt.Printf("api error: %s\n", errUserInfo.Error())
