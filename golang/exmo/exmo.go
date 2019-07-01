@@ -208,3 +208,11 @@ func (ex *Exmo) MarketSell(pair string, quantity string) (response ApiResponse, 
 	}
 	return
 }
+
+func (ex *Exmo) OrderCancel(orderId string) (response ApiResponse, err error) {
+	response, err = ex.Api_query("authenticated", "order_cancel", ApiParams{"order_id": orderId})
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}

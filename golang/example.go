@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"github.com/exmo-dev/exmo_api_lib/tree/master/golang/exmo"
 	"math/big"
+	"strconv"
 	"time"
 )
 
 func main() {
+
+	var orderId string
 
 	key := ""    // TODO replace with your api key from profile page
 	secret := "" // TODO replace with your api secret from profile page
@@ -140,7 +143,7 @@ func main() {
 		}
 	}
 
-	order, errOrder := api.Buy("BTC_RUB", "0.001", "664096.72")
+	order, errOrder := api.Buy("BTC_RUB", "0.001", "50096")
 	if errOrder != nil {
 		fmt.Printf("api error: %s\n", errOrder.Error())
 	} else {
@@ -153,7 +156,9 @@ func main() {
 				fmt.Println(value)
 			}
 			if key == "order_id" && value != nil {
-				fmt.Printf("Order id: %f", value.(float64))
+				val := strconv.Itoa(int(value.(float64)))
+				orderId = val
+				fmt.Printf("Order id: %s", orderId)
 			}
 		}
 	}
@@ -208,6 +213,21 @@ func main() {
 			}
 			if key == "order_id" && value != nil {
 				fmt.Printf("Order id: %f", value.(float64))
+			}
+		}
+	}
+
+	orderCancel, errCancel := api.OrderCancel(orderId)
+	if errCancel != nil {
+		fmt.Printf("api error: %s\n", errCancel.Error())
+	} else {
+		fmt.Printf("\nCancel order %s \n", orderId)
+		for key, value := range orderCancel {
+			if key == "result" && value != true {
+				fmt.Println("\nError")
+			}
+			if key == "error" && value != "" {
+				fmt.Println(value)
 			}
 		}
 	}
