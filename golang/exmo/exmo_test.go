@@ -89,6 +89,20 @@ func TestApi_query(t *testing.T) {
 		}
 	})
 
+	t.Run("Get pair settings", func(t *testing.T) {
+		result, err := api.Ticker()
+		if err != nil {
+			t.Errorf("api error: %s\n", err.Error())
+		} else {
+			for pair, pairvalue := range result {
+				fmt.Printf("\n\n%s:\n", pair)
+				for key, value := range pairvalue.(map[string]interface{}) {
+					fmt.Println(key, value)
+				}
+			}
+		}
+	})
+
 	t.Run("Get user info", func(t *testing.T) {
 		fmt.Printf("-------------\n")
 		result, err := api.GetUserInfo()

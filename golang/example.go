@@ -79,6 +79,18 @@ func main() {
 		}
 	}
 
+	resultPairSettings, errPairSettings := api.GetPairSettings()
+	if errPairSettings != nil {
+		fmt.Printf("api error: %s\n", errPairSettings.Error())
+	} else {
+		for pair, pairvalue := range resultPairSettings {
+			fmt.Printf("\n\n%s:\n", pair)
+			for key, value := range pairvalue.(map[string]interface{}) {
+				fmt.Println(key, value)
+			}
+		}
+	}
+
 	resultUserInfo, errUserInfo := api.GetUserInfo()
 	if errUserInfo != nil {
 		fmt.Printf("api error: %s\n", errUserInfo.Error())

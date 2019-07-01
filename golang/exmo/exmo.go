@@ -118,6 +118,14 @@ func (ex *Exmo) Ticker() (response ApiResponse, err error) {
 	return
 }
 
+func (ex *Exmo) GetPairSettings() (response ApiResponse, err error) {
+	response, err = ex.Api_query("public", "pair_settings", ApiParams{})
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}
+
 // Get info about user account
 func (ex *Exmo) GetUserInfo() (response ApiResponse, err error) {
 	response, err = ex.Api_query("authenticated", "user_info", nil)
