@@ -2,11 +2,12 @@ package exmo
 
 import (
 	"fmt"
-	"github.com/exmo-dev/exmo_api_lib/tree/master/golang/exmo"
 	"math/big"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/exmo-dev/exmo_api_lib/tree/master/golang/exmo"
 )
 
 func TestApi_query(t *testing.T) {
@@ -256,6 +257,49 @@ func TestApi_query(t *testing.T) {
 				}
 				if key == "error" && value != "" {
 					fmt.Println(value)
+				}
+			}
+		}
+	})
+
+	t.Run("Get user's open orders", func(t *testing.T) {
+		resultUserOpenOrders, errUserOpenOrders := api.GetUserOpenOrders()
+		if errUserOpenOrders != nil {
+			fmt.Errorf("api error: %s\n", errUserOpenOrders.Error())
+		} else {
+			for _, v := range resultUserOpenOrders {
+				if v != nil {
+					for _, val := range v.([]interface{}) {
+						for key, value := range val.(map[string]interface{}) {
+							if key == "quantity" {
+								check, err := strconv.ParseFloat(value.(string), 64)
+								if err != nil {
+									t.Errorf("Could not convert %s to float64", key)
+								}
+								if check < 0 {
+									t.Errorf("%s could not be less 0, got %d", key, value)
+								}
+							}
+							if key == "price" {
+								check, err := strconv.Atoi(value.(string))
+								if err != nil {
+									t.Errorf("Could not convert %s to int", key)
+								}
+								if check < 0 {
+									t.Errorf("%s could not be less 0, got %d", key, value)
+								}
+							}
+							if key == "amount" {
+								check, err := strconv.ParseFloat(value.(string), 64)
+								if err != nil {
+									t.Errorf("Could not convert %s to float64", key)
+								}
+								if check < 0 {
+									t.Errorf("%s could not be less 0, got %d", key, value)
+								}
+							}
+						}
+					}
 				}
 			}
 		}

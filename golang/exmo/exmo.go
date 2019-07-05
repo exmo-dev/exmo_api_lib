@@ -216,3 +216,11 @@ func (ex *Exmo) OrderCancel(orderId string) (response ApiResponse, err error) {
 	}
 	return
 }
+
+func (ex *Exmo) GetUserOpenOrders() (response ApiResponse, err error) {
+	response, err = ex.Api_query("authenticated", "user_open_orders", ApiParams{})
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}

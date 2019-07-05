@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/exmo-dev/exmo_api_lib/tree/master/golang/exmo"
 	"math/big"
 	"strconv"
 	"time"
+
+	"github.com/exmo-dev/exmo_api_lib/tree/master/golang/exmo"
 )
 
 func main() {
@@ -228,6 +229,19 @@ func main() {
 			}
 			if key == "error" && value != "" {
 				fmt.Println(value)
+			}
+		}
+	}
+
+	resultUserOpenOrders, errUserOpenOrders := api.GetUserOpenOrders()
+	if errUserOpenOrders != nil {
+		fmt.Errorf("api error: %s\n", errUserOpenOrders.Error())
+	} else {
+		for _, v := range resultUserOpenOrders {
+			for _, val := range v.([]interface{}) {
+				for key, value := range val.(map[string]interface{}) {
+					fmt.Println(key, value)
+				}
 			}
 		}
 	}
