@@ -304,4 +304,31 @@ func TestApi_query(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("Get user's cancelled orders", func(t *testing.T) {
+		resultUserCancelledOrders, errUserCancelledOrders := api.GetUserCancelledOrders(0, 100)
+		if errUserCancelledOrders != nil {
+			fmt.Errorf("api error: %s\n", errUserCancelledOrders.Error())
+		} else {
+			for _, v := range resultUserCancelledOrders {
+
+				if v != nil {
+					for key, value := range v.(map[string]interface{}) {
+
+						if key == "quantity" || key == "price" ||
+							key == "amount" {
+							check, ok := value.(float64)
+							if ok != true {
+								t.Errorf("Could not convert %s to float64", key)
+							}
+							if check < 0 {
+								t.Errorf("%s could not be less 0, got %d", key, value)
+							}
+						}
+					}
+				}
+			}
+		}
+	})
+
 }

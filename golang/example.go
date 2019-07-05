@@ -245,4 +245,19 @@ func main() {
 			}
 		}
 	}
+
+	resultUserCancelledOrders, errUserCancelledOrders := api.GetUserCancelledOrders(0, 100)
+	if errUserCancelledOrders != nil {
+		fmt.Errorf("api error: %s\n", errUserCancelledOrders.Error())
+	} else {
+		for _, v := range resultUserCancelledOrders {
+			for key, val := range v.(map[string]interface{}) {
+				if key == "pair" {
+					fmt.Printf("\n%s\n", val)
+				} else {
+					fmt.Println(key, val)
+				}
+			}
+		}
+	}
 }

@@ -224,3 +224,50 @@ func (ex *Exmo) GetUserOpenOrders() (response ApiResponse, err error) {
 	}
 	return
 }
+
+func (ex *Exmo) GetUserCancelledOrders(offset uint, limit uint) (response []interface{}, err error) {
+	if limit < 100 || limit > 1000 {
+		fmt.Printf("limit param must be in range of 100-1000")
+		response = nil
+		err = errors.New("limit param must be in range of 100-1000")
+	} else {
+
+		post_params := url.Values{}
+
+		post_params.Add("nonce", nonce())
+		post_params.Add("offset", string(offset))
+		post_params.Add("limit", string(limit))
+
+		post_content := post_params.Encode()
+
+		sign := ex.Do_sign(post_content)
+
+		req, _ := http.NewRequest("POST", "https://api.exmo.com/v1/user_cancelled_orders", bytes.NewBuffer([]byte(post_content)))
+		req.Header.Set("Key", ex.key)
+		req.Header.Set("Sign", sign)
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		req.Header.Add("Content-Length", strconv.Itoa(len(post_content)))
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		if resp.Status != "200 OK" {
+			return nil, errors.New("http status: " + resp.Status)
+		}
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal([]byte(body), &response)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return
+}
