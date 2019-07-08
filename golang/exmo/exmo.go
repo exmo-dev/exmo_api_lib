@@ -271,3 +271,11 @@ func (ex *Exmo) GetUserCancelledOrders(offset uint, limit uint) (response []inte
 	}
 	return
 }
+
+func (ex *Exmo) GetOrderTrades(orderId string) (response ApiResponse, err error) {
+	response, err = ex.Api_query("authenticated", "order_trades", ApiParams{"order_id": orderId})
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}

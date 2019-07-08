@@ -157,9 +157,10 @@ func main() {
 				fmt.Println(value)
 			}
 			if key == "order_id" && value != nil {
+				fmt.Printf("Order id: %d\n", int(value.(float64)))
 				val := strconv.Itoa(int(value.(float64)))
 				orderId = val
-				fmt.Printf("Order id: %s", orderId)
+				fmt.Printf("Order id: %s\n", orderId)
 			}
 		}
 	}
@@ -195,7 +196,9 @@ func main() {
 				fmt.Println(value)
 			}
 			if key == "order_id" && value != nil {
-				fmt.Printf("Order id: %f", value.(float64))
+				val := strconv.Itoa(int(value.(float64)))
+				orderId = val
+				fmt.Printf("Order id: %f", orderId)
 			}
 		}
 	}
@@ -256,6 +259,19 @@ func main() {
 					fmt.Printf("\n%s\n", val)
 				} else {
 					fmt.Println(key, val)
+				}
+			}
+		}
+	}
+
+	resultOrderTrades, errOrderTrades := api.GetOrderTrades(orderId)
+	if errOrderTrades != nil {
+		fmt.Errorf("api error: %s\n", errOrderTrades.Error())
+	} else {
+		for _, v := range resultOrderTrades {
+			for _, val := range v.([]interface{}) {
+				for key, value := range val.(map[string]interface{}) {
+					fmt.Println(key, value)
 				}
 			}
 		}
