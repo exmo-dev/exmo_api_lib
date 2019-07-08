@@ -379,4 +379,21 @@ func TestApi_query(t *testing.T) {
 		}
 	})
 
+	t.Run("Calculating the sum of buying a certain amount of currency for the particular currency pair", func(t *testing.T) {
+		resultRequiredAmount, errRequiredAmount := api.GetRequiredAmount("BTC_RUB", "0.01")
+		if errRequiredAmount != nil {
+			fmt.Errorf("api error: %s\n", errRequiredAmount.Error())
+		} else {
+			for k, v := range resultRequiredAmount {
+				check, err := strconv.ParseFloat(v.(string), 64)
+				if err != nil {
+					t.Errorf("Could not convert %s to float64", k)
+				}
+				if check < 0 {
+					t.Errorf("%s could not be less 0, got %d", k, v)
+				}
+			}
+		}
+	})
+
 }

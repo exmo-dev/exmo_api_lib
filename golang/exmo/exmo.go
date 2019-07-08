@@ -279,3 +279,11 @@ func (ex *Exmo) GetOrderTrades(orderId string) (response ApiResponse, err error)
 	}
 	return
 }
+
+func (ex *Exmo) GetRequiredAmount(pair string, quantity string) (response ApiResponse, err error) {
+	response, err = ex.Api_query("authenticated", "required_amount", ApiParams{"pair": pair, "quantity": quantity})
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}

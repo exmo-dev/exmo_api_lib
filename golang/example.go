@@ -276,4 +276,13 @@ func main() {
 			}
 		}
 	}
+
+	resultRequiredAmount, errRequiredAmount := api.GetRequiredAmount("BTC_RUB", "0.01")
+	if errRequiredAmount != nil {
+		fmt.Errorf("api error: %s\n", errRequiredAmount.Error())
+	} else {
+		for k, v := range resultRequiredAmount {
+			fmt.Println(k, v)
+		}
+	}
 }
