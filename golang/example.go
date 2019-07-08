@@ -285,4 +285,13 @@ func main() {
 			fmt.Println(k, v)
 		}
 	}
+
+	resultDepositAddress, errDepositAddress := api.GetDepositAddress()
+	if errDepositAddress != nil {
+		fmt.Errorf("api error: %s\n", errDepositAddress.Error())
+	} else {
+		for k, v := range resultDepositAddress {
+			fmt.Println(k, v)
+		}
+	}
 }

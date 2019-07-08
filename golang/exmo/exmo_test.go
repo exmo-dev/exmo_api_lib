@@ -396,4 +396,17 @@ func TestApi_query(t *testing.T) {
 		}
 	})
 
+	t.Run("Getting the list of addresses for cryptocurrency deposit", func(t *testing.T) {
+		resultDepositAddress, errDepositAddress := api.GetDepositAddress()
+		if errDepositAddress != nil {
+			fmt.Errorf("api error: %s\n", errDepositAddress.Error())
+		} else {
+			for _, v := range resultDepositAddress {
+				_, ok := v.(string)
+				if ok != true {
+					t.Errorf("Could not convert %s address to string", key)
+				}
+			}
+		}
+	})
 }

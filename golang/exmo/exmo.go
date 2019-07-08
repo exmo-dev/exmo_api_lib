@@ -287,3 +287,11 @@ func (ex *Exmo) GetRequiredAmount(pair string, quantity string) (response ApiRes
 	}
 	return
 }
+
+func (ex *Exmo) GetDepositAddress() (response ApiResponse, err error) {
+	response, err = ex.Api_query("authenticated", "deposit_address", ApiParams{})
+	if err != nil {
+		fmt.Printf("api error: %s\n", err.Error())
+	}
+	return
+}
