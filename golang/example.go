@@ -178,7 +178,9 @@ func main() {
 				fmt.Println(value)
 			}
 			if key == "order_id" && value != nil {
-				fmt.Printf("Order id: %f", value.(float64))
+				val := strconv.Itoa(int(value.(float64)))
+				orderId = val
+				fmt.Printf("Order id: %s", orderId)
 			}
 		}
 	}
@@ -203,7 +205,7 @@ func main() {
 		}
 	}
 
-	orderSellMarket, errOrderSellMarket := api.MarketSell("BTC_RUB", "0.001")
+	orderSellMarket, errOrderSellMarket := api.MarketSell("BTC_RUB", "0.0005")
 	if errOrderSellMarket != nil {
 		fmt.Printf("api error: %s\n", errOrderSellMarket.Error())
 	} else {
@@ -216,7 +218,9 @@ func main() {
 				fmt.Println(value)
 			}
 			if key == "order_id" && value != nil {
-				fmt.Printf("Order id: %f", value.(float64))
+				val := strconv.Itoa(int(value.(float64)))
+				orderId = val
+				fmt.Printf("Order id: %s", orderId)
 			}
 		}
 	}
@@ -264,16 +268,14 @@ func main() {
 		}
 	}
 
+	time.Sleep(10000 * time.Millisecond)
 	resultOrderTrades, errOrderTrades := api.GetOrderTrades(orderId)
 	if errOrderTrades != nil {
 		fmt.Errorf("api error: %s\n", errOrderTrades.Error())
 	} else {
-		for _, v := range resultOrderTrades {
-			for _, val := range v.([]interface{}) {
-				for key, value := range val.(map[string]interface{}) {
-					fmt.Println(key, value)
-				}
-			}
+		for k, v := range resultOrderTrades {
+			fmt.Println(k, v)
+
 		}
 	}
 
@@ -291,6 +293,24 @@ func main() {
 		fmt.Errorf("api error: %s\n", errDepositAddress.Error())
 	} else {
 		for k, v := range resultDepositAddress {
+			fmt.Println(k, v)
+		}
+	}
+
+	/*
+	   WALLET API
+	*/
+
+	resultWalletHistory, errWalletHistory := api.GetWalletHistory(time.Now())
+	if errWalletHistory != nil {
+		fmt.Errorf("api error: %s\n", errWalletHistory.Error())
+	} else {
+		for k, v := range resultWalletHistory {
+			if k == "history" {
+				for key, val := range v.([]interface{}) {
+					fmt.Println(key, val)
+				}
+			}
 			fmt.Println(k, v)
 		}
 	}

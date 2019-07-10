@@ -1,3 +1,7 @@
+/*
+  Package exmo simplifies interaction with exmo.com API.
+*/
+
 package exmo
 
 import (
@@ -8,24 +12,38 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
 )
 
+// ApiResponse is a map for API responses
 type ApiResponse map[string]interface{}
+
+// ApiParams is a map for API calls' params
 type ApiParams map[string]string
 
+// Exmo holds client-specific info
 type Exmo struct {
-	key    string
-	secret string
+	key    string // public key
+	secret string // secret key
 }
 
+// CheckErr checks error object
+func CheckErr(err error) {
+	if err != nil {
+		log.Printf("api error: %s\n", err.Error())
+	}
+}
+
+// Api creates Exmo instance with specified credentials
 func Api(key string, secret string) Exmo {
 	return Exmo{key, secret}
 }
 
+// Api_query is a general query method for API calls
 func (ex *Exmo) Api_query(mode string, method string, params ApiParams) (ApiResponse, error) {
 
 	post_params := url.Values{}
@@ -76,25 +94,30 @@ func (ex *Exmo) Api_query(mode string, method string, params ApiParams) (ApiResp
 	return dat, nil
 }
 
+// nonce generates request parameter ‘nonce’ with incremental numerical value (>0). The incremental numerical value should never reiterate or decrease.
 func nonce() string {
 	return fmt.Sprintf("%d", time.Now().UnixNano())
 }
 
+// Do_sign encrypts POST data (param=val&param1=val1) with method HMAC-SHA512 using secret key; the secret key also can be found in user’s profile settings
 func (ex *Exmo) Do_sign(message string) string {
 	mac := hmac.New(sha512.New, []byte(ex.secret))
 	mac.Write([]byte(message))
 	return fmt.Sprintf("%x", mac.Sum(nil))
 }
 
-// Get all trades
+/*
+   Public API
+*/
+
+// GetTrades return list of the deals on currency pairs
 func (ex *Exmo) GetTrades(pair string) (response ApiResponse, err error) {
 	response, err = ex.Api_query("public", "trades", ApiParams{"pair": pair})
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// GetOrderBook return the book of current orders on the currency pair
 func (ex *Exmo) GetOrderBook(pair string, limit int) (response ApiResponse, err error) {
 	if limit < 100 || limit > 1000 {
 		fmt.Printf("limit param must be in range of 100-1000")
@@ -103,13 +126,12 @@ func (ex *Exmo) GetOrderBook(pair string, limit int) (response ApiResponse, err 
 
 	} else {
 		response, err = ex.Api_query("public", "order_book", ApiParams{"pair": pair, "limit": string(limit)})
-		if err != nil {
-			fmt.Printf("api error: %s\n", err.Error())
-		}
+		CheckErr(err)
 	}
 	return
 }
 
+// Ticker return statistics on prices and volume of trades by currency pairs
 func (ex *Exmo) Ticker() (response ApiResponse, err error) {
 	response, err = ex.Api_query("public", "ticker", ApiParams{})
 	if err != nil {
@@ -118,14 +140,14 @@ func (ex *Exmo) Ticker() (response ApiResponse, err error) {
 	return
 }
 
+// GetPairSettings return currency pairs settings
 func (ex *Exmo) GetPairSettings() (response ApiResponse, err error) {
 	response, err = ex.Api_query("public", "pair_settings", ApiParams{})
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// GetCurrency return currencies list
 func (ex *Exmo) GetCurrency() (response []string, err error) {
 
 	resp, err := http.Get("https://api.exmo.com/v1/currency")
@@ -152,79 +174,88 @@ func (ex *Exmo) GetCurrency() (response []string, err error) {
 	return dat, nil
 }
 
-// Get info about user account
+/*
+   Authenticated API
+*/
+
+// GetUserInfo return information about user's account
 func (ex *Exmo) GetUserInfo() (response ApiResponse, err error) {
 	response, err = ex.Api_query("authenticated", "user_info", nil)
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// GetUserTrades return the list of user’s deals
 func (ex *Exmo) GetUserTrades(pair string) (response ApiResponse, err error) {
 	response, err = ex.Api_query("authenticated", "user_trades", ApiParams{"pair": pair})
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// OrderCreate creates order
 func (ex *Exmo) OrderCreate(pair string, quantity string, price string, typeOrder string) (response ApiResponse, err error) {
 	response, err = ex.Api_query("authenticated", "order_create", ApiParams{"pair": pair, "quantity": quantity, "price": price, "type": typeOrder})
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// Buy creates buy order
 func (ex *Exmo) Buy(pair string, quantity string, price string) (response ApiResponse, err error) {
 	response, err = ex.OrderCreate(pair, quantity, price, "buy")
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// Buy creates sell order
 func (ex *Exmo) Sell(pair string, quantity string, price string) (response ApiResponse, err error) {
 	response, err = ex.OrderCreate(pair, quantity, price, "sell")
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// MarketBuy creates market buy-order
 func (ex *Exmo) MarketBuy(pair string, quantity string) (response ApiResponse, err error) {
 	response, err = ex.OrderCreate(pair, quantity, "0", "market_buy")
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// MarketBuyTotal creates market buy-order for a certain amount (quantity parameter)
+func (ex *Exmo) MarketBuyTotal(pair string, quantity string) (response ApiResponse, err error) {
+	response, err = ex.OrderCreate(pair, quantity, "0", "market_buy_total")
+	CheckErr(err)
+	return
+}
+
+// MarketSell creates market sell-order
 func (ex *Exmo) MarketSell(pair string, quantity string) (response ApiResponse, err error) {
 	response, err = ex.OrderCreate(pair, quantity, "0", "market_sell")
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// MarketSellTotal creates market sell-order for a certain amount (quantity parameter)
+func (ex *Exmo) MarketSellTotal(pair string, quantity string) (response ApiResponse, err error) {
+	response, err = ex.OrderCreate(pair, quantity, "0", "market_sell_total")
+	CheckErr(err)
+	return
+}
+
+// OrderCancel cancels order
 func (ex *Exmo) OrderCancel(orderId string) (response ApiResponse, err error) {
 	response, err = ex.Api_query("authenticated", "order_cancel", ApiParams{"order_id": orderId})
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// GetUserOpenOrders returns the list of user’s active orders
 func (ex *Exmo) GetUserOpenOrders() (response ApiResponse, err error) {
 	response, err = ex.Api_query("authenticated", "user_open_orders", ApiParams{})
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// GetUserCancelledOrders returns the list of user’s deals
 func (ex *Exmo) GetUserCancelledOrders(offset uint, limit uint) (response []interface{}, err error) {
 	if limit < 100 || limit > 1000 {
 		fmt.Printf("limit param must be in range of 100-1000")
@@ -272,26 +303,44 @@ func (ex *Exmo) GetUserCancelledOrders(offset uint, limit uint) (response []inte
 	return
 }
 
+// GetOrderTrades returns the list of user’s cancelled orders
 func (ex *Exmo) GetOrderTrades(orderId string) (response ApiResponse, err error) {
 	response, err = ex.Api_query("authenticated", "order_trades", ApiParams{"order_id": orderId})
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// GetRequiredAmount calculating and returns the sum of buying a certain amount of currency for the particular currency pair
 func (ex *Exmo) GetRequiredAmount(pair string, quantity string) (response ApiResponse, err error) {
 	response, err = ex.Api_query("authenticated", "required_amount", ApiParams{"pair": pair, "quantity": quantity})
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
-	}
+	CheckErr(err)
 	return
 }
 
+// GetDepositAddress returns the list of addresses for cryptocurrency deposit
 func (ex *Exmo) GetDepositAddress() (response ApiResponse, err error) {
 	response, err = ex.Api_query("authenticated", "deposit_address", ApiParams{})
-	if err != nil {
-		fmt.Printf("api error: %s\n", err.Error())
+	CheckErr(err)
+	return
+}
+
+/*
+   Wallet API
+*/
+
+// GetWalletHistory returns history of wallet
+func (ex *Exmo) GetWalletHistory(date time.Time) (response ApiResponse, err error) {
+	dateUnix := date.Unix()
+
+	dateConverted := strconv.Itoa(int(dateUnix))
+	fmt.Println(dateConverted)
+
+	if !date.IsZero() {
+		response, err = ex.Api_query("authenticated", "wallet_history", ApiParams{})
+	} else {
+		response, err = ex.Api_query("authenticated", "wallet_history", ApiParams{"date": dateConverted})
 	}
+
+	CheckErr(err)
 	return
 }
