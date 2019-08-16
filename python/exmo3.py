@@ -47,3 +47,16 @@ class ExmoAPI:
 # Example
 ExmoAPI_instance = ExmoAPI('YOUR API KEY', 'YOUR API SECRET')
 print(ExmoAPI_instance.api_query('user_info'))
+
+# print(ExmoAPI_instance.api_query('order_create', {
+#     "pair": 'DOGE_BTC',
+#     "quantity":100,
+#     "price":0.00001,
+#     "type":"sell"
+#     })
+# )
+
+# print(ExmoAPI_instance.api_query('order_cancel', {
+#     "order_id": 3063120293
+#     })
+# )
