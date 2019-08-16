@@ -53,6 +53,15 @@
               $( "#result" ).append( "<p>"+JSON.stringify(data)+"</p>" );
             });
         });
+        
+        $.ajax({
+            url: 'https://api.exmo.com/v1/trades/?pair=BTC_USD',
+            type: 'get',
+            dataType: 'json',
+            success: function (data) {
+                $( "#result" ).append( "<p>"+JSON.stringify(data)+"</p>" );
+            }
+        });
     });
 </script>
 </body>
