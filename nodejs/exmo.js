@@ -1,4 +1,4 @@
-var CryptoJS = require("crypto-js")
+var crypto = require('crypto')
 	http = require('http'),
 	querystring = require('querystring'),
 	request = require('request'),
@@ -8,7 +8,7 @@ var CryptoJS = require("crypto-js")
 	
 
 function sign(message){
-    return CryptoJS.HmacSHA512(message, config.secret).toString(CryptoJS.enc.hex);
+    return crypto.createHmac('sha512', config.secret).update(message).digest('hex');
 }
 
 exports.init_exmo = function (cfg) {
