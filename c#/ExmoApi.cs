@@ -18,7 +18,7 @@ namespace ExmoAPI
         // API settings
         private string _key; 
         private string _secret; 
-        private string _url = "http://api.exmo.com/v1/{0}";
+        private string _url = "https://api.exmo.com/v1/{0}";
 
         static ExmoApi()
         {
