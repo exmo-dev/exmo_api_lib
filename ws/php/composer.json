@@ -1,0 +1,20 @@
+{
+    "name": "exmo/web-socket-api",
+    "type": "library",
+    "description": "Composer package Exmo (Bitcoin Exchange) WebSocket API PHP client",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.4.2",
+        "ratchet/pawl": "^0.3.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Exmo\\WebSocketApi\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
