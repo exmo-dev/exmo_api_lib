@@ -1,0 +1,15 @@
+{
+  "name": "exmo_api_lib_demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "exmo",
+  "license": "ISC",
+  "dependencies": {
+    "crypto-js": "^4.0.0",
+    "ws": "^7.3.0"
+  }
+}
