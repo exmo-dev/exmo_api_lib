@@ -4,6 +4,7 @@
   "description": "",
   "main": "client.js",
   "scripts": {
+    "start": "node ./start.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "exmo",
