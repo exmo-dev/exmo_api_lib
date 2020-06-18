@@ -5,5 +5,5 @@ function createWSConnection(props) {
 }
 
 module.exports = {
-  createWSConnection
+  createWSConnection,
 };

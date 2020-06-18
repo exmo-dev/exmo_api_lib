@@ -47,4 +47,4 @@ function connectExmoWSPrivateApi(apiKey) {
 module.exports = {
   connectExmoWSPublicApi,
   connectExmoWSPrivateApi,
-}
+};
