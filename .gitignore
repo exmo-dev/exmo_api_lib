@@ -6,3 +6,4 @@ dist
 .sass-cache
 bower_components
 target
+bin

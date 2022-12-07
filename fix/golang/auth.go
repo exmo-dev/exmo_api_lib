@@ -6,10 +6,11 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/binary"
-	"fmt"
+	"log"
 	"strconv"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/quickfixgo/quickfix"
 	"github.com/quickfixgo/quickfix/enum"
 	"github.com/quickfixgo/quickfix/tag"
@@ -27,62 +28,72 @@ type Presign struct {
 	Password     string
 }
 
-func SignLogonMsg(msg *quickfix.Message, secret ApiSecret) {
+func SignLogonMsg(msg *quickfix.Message, secret APISecret) {
 	if msg.IsMsgTypeOf(enum.MsgType_LOGON) {
-		//set passPhrase
+		// set passPhrase
 		msg.Body.SetString(tag.Password, strconv.FormatInt(time.Now().UTC().Unix(), 10))
 
-		//extract presign struct
+		// extract presign struct
 		presign, err := getMsgPresign(msg)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+
 			return
 		}
 
-		//make preSignByte from presign
+		// make preSignByte from presign
 		preSignByte, err := makePresignByte(presign)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+
 			return
 		}
 
-		//sign is 64 based sha512(preSignByte)
+		// sign is base64-encoded HMAC-hashed (with sha512-hash, and secret) preSignByte
 		sign := createSignFromBodyAndSecret(preSignByte, []byte(secret))
 
-		//sign the logonMessage
+		// sign the logonMessage
 		msg.Body.SetString(tag.RawData, sign)
 	}
 }
 
-func getMsgPresign(msg *quickfix.Message) (Presign, error) {
+func getMsgPresign(msg *quickfix.Message) (*Presign, error) {
 	var senderCompID quickfix.FIXString
+
 	err := msg.Header.GetField(tag.SenderCompID, &senderCompID)
 	if err != nil {
-		return Presign{}, err
+		return nil, err
 	}
+
 	var targetCompID quickfix.FIXString
+
 	err = msg.Header.GetField(tag.TargetCompID, &targetCompID)
 	if err != nil {
-		return Presign{}, err
+		return nil, err
 	}
+
 	var msgSeqNum quickfix.FIXInt
+
 	err = msg.Header.GetField(tag.MsgSeqNum, &msgSeqNum)
 	if err != nil {
-		return Presign{}, err
+		return nil, err
 	}
+
 	var sendingTime quickfix.FIXUTCTimestamp
+
 	err = msg.Header.GetField(tag.SendingTime, &sendingTime)
 	if err != nil {
-		return Presign{}, err
+		return nil, err
 	}
 
 	var password quickfix.FIXString
+
 	err = msg.Body.GetField(tag.Password, &password)
 	if err != nil {
-		return Presign{}, err
+		return nil, err
 	}
 
-	return Presign{
+	return &Presign{
 		SendingTime:  sendingTime.UTC().Unix(),
 		MsgSeqNum:    msgSeqNum.Int(),
 		SenderCompID: senderCompID.String(),
@@ -91,30 +102,30 @@ func getMsgPresign(msg *quickfix.Message) (Presign, error) {
 	}, nil
 }
 
-func makePresignByte(msg Presign) ([]byte, error) {
+func makePresignByte(msg *Presign) ([]byte, error) {
 	presignByte := new(bytes.Buffer)
 
-	//sendingTime
+	// sendingTime
 	binaryWriteErr := addToPresign(presignByte, msg.SendingTime, true)
 	if binaryWriteErr != nil {
 		return nil, binaryWriteErr
 	}
-	//msgSeqNum
+	// msgSeqNum
 	binaryWriteErr = addToPresign(presignByte, int64(msg.MsgSeqNum), true)
 	if binaryWriteErr != nil {
 		return nil, binaryWriteErr
 	}
-	//senderCompID
+	// senderCompID
 	binaryWriteErr = addToPresign(presignByte, msg.SenderCompID, true)
 	if binaryWriteErr != nil {
 		return nil, binaryWriteErr
 	}
-	//targetCompID
+	// targetCompID
 	binaryWriteErr = addToPresign(presignByte, msg.TargetCompID, true)
 	if binaryWriteErr != nil {
 		return nil, binaryWriteErr
 	}
-	//password
+	// password
 	binaryWriteErr = addToPresign(presignByte, msg.Password, false)
 	if binaryWriteErr != nil {
 		return nil, binaryWriteErr
@@ -123,30 +134,37 @@ func makePresignByte(msg Presign) ([]byte, error) {
 	return presignByte.Bytes(), nil
 }
 
-func addToPresign[Field int64 | string](presignByte *bytes.Buffer, field Field, withDelimeter bool) (binaryWriteErr error) {
-	switch f := any(field).(type) {
+func addToPresign[Field int64 | string](
+	presignByte *bytes.Buffer,
+	field Field,
+	withDelimeter bool,
+) error {
+	switch typedField := any(field).(type) {
 	case string:
-		_, binaryWriteErr = presignByte.WriteString(f)
+		_, binaryWriteErr := presignByte.WriteString(typedField)
 		if binaryWriteErr != nil {
-			return binaryWriteErr
+			return errors.Wrap(binaryWriteErr, "unable to write presignString")
 		}
 	default:
-		binaryWriteErr = binary.Write(presignByte, binary.LittleEndian, f)
+		binaryWriteErr := binary.Write(presignByte, binary.LittleEndian, typedField)
 		if binaryWriteErr != nil {
-			return binaryWriteErr
+			return errors.Wrap(binaryWriteErr, "unable to write presignByte")
 		}
 	}
+
 	if withDelimeter {
 		return addDelimiter(presignByte)
 	}
+
 	return nil
 }
 
 func addDelimiter(presignByte *bytes.Buffer) error {
 	binaryWriteErr := presignByte.WriteByte(delimiter)
 	if binaryWriteErr != nil {
-		return binaryWriteErr
+		return errors.Wrap(binaryWriteErr, "unable to write delimiter")
 	}
+
 	return nil
 }
 
