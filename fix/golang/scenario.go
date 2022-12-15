@@ -11,6 +11,7 @@ import (
 	"github.com/quickfixgo/quickfix/field"
 	"github.com/quickfixgo/quickfix/fix44/marketdatarequest"
 	"github.com/quickfixgo/quickfix/fix44/newordersingle"
+	"github.com/quickfixgo/quickfix/fix44/ordercancelrequest"
 	"github.com/quickfixgo/quickfix/fix44/securitydefinitionrequest"
 	"github.com/quickfixgo/quickfix/fix44/securitylistrequest"
 	"github.com/shopspring/decimal"
@@ -20,7 +21,7 @@ type Sender func(m quickfix.Messagable) error
 
 // scenario performs imaginary actions sequence.
 func scenario(session quickfix.SessionID) error {
-	const pair = "BTC_USD"
+	const pair = "BTC_USDT"
 
 	log.Println("scenario started")
 
@@ -41,26 +42,44 @@ func scenario(session quickfix.SessionID) error {
 		return errors.Wrap(err, "security definition request")
 	}
 
-	mdRequestID := strconv.Itoa(int(time.Now().UTC().Unix()))
-	if err := requestMarketData(sender, mdRequestID, pair); err != nil {
+	mdRequestID, err := requestMarketData(sender, pair)
+	if err != nil {
 		return errors.Wrap(err, "market data request")
 	}
 
-	if err := createBuyOrder(sender, pair); err != nil {
+	orderID, err := createBuyOrder(sender, pair)
+	if err != nil {
 		return errors.Wrap(err, "create buy order")
+	}
+
+	if err := cancelOrder(sender, orderID); err != nil {
+		return errors.Wrap(err, "order cancellation")
 	}
 
 	if err := unsubscribeFromMarketData(sender, mdRequestID); err != nil {
 		return errors.Wrap(err, "market data unsubscription")
 	}
 
-	if err := createSellOrder(sender, pair); err != nil {
+	if _, err := createSellOrder(sender, pair); err != nil {
 		return errors.Wrap(err, "create sell order")
 	}
 
 	log.Println("scenario finished")
 
 	return nil
+}
+
+func cancelOrder(sender Sender, orderID string) error {
+	log.Println("order cancellation")
+
+	cancelOrderRequest := ordercancelrequest.New(
+		field.NewOrigClOrdID(orderID),
+		field.NewClOrdID(""),                    // ignored
+		field.NewSide(""),                       // ignored
+		field.NewTransactTime(time.Now().UTC()), // ignored
+	)
+
+	return sender(cancelOrderRequest)
 }
 
 func unsubscribeFromMarketData(sender Sender, mdRequestID string) error {
@@ -73,19 +92,19 @@ func unsubscribeFromMarketData(sender Sender, mdRequestID string) error {
 	))
 }
 
-func createBuyOrder(sender Sender, pair string) error {
+func createBuyOrder(sender Sender, pair string) (string, error) {
 	log.Println("creating buy order")
 
 	return createOrder(sender, pair, enum.Side_BUY)
 }
 
-func createSellOrder(sender Sender, pair string) error {
+func createSellOrder(sender Sender, pair string) (string, error) {
 	log.Println("creating sell order")
 
 	return createOrder(sender, pair, enum.Side_SELL)
 }
 
-func createOrder(sender Sender, pair string, side enum.Side) error {
+func createOrder(sender Sender, pair string, side enum.Side) (string, error) {
 	const (
 		quantityScale = 8
 		priceScale    = 8
@@ -106,14 +125,15 @@ func createOrder(sender Sender, pair string, side enum.Side) error {
 	singleOrderRequest.SetExecInst("")
 	singleOrderRequest.SetPrice(decimal.NewFromInt(price), priceScale)
 
-	return sender(singleOrderRequest)
+	return orderID, sender(singleOrderRequest)
 }
 
-func requestMarketData(sender Sender, requestID string, pair string) error {
+func requestMarketData(sender Sender, pair string) (string, error) {
 	log.Println("requesting market data")
 
+	mdRequestID := strconv.Itoa(int(time.Now().UTC().Unix()))
 	mdReq := marketdatarequest.New(
-		field.NewMDReqID(requestID),
+		field.NewMDReqID(mdRequestID),
 		field.NewSubscriptionRequestType(enum.SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES),
 		field.NewMarketDepth(0), // ignored
 	)
@@ -129,7 +149,7 @@ func requestMarketData(sender Sender, requestID string, pair string) error {
 	relatedSym.SetSymbol(pair)
 	mdReq.SetNoRelatedSym(relatedSymGrp)
 
-	return sender(mdReq)
+	return mdRequestID, sender(mdReq)
 }
 
 func requestSecurityDefinition(sender Sender, pair string) error {

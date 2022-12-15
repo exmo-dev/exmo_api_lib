@@ -13,7 +13,6 @@ import (
 	"syscall"
 
 	"github.com/fatih/color"
-	"github.com/mikhalytch/eggs/try"
 	"github.com/pkg/errors"
 	"github.com/quickfixgo/quickfix"
 	"github.com/quickfixgo/quickfix/config"
@@ -45,9 +44,17 @@ func main0() error {
 	go func() {
 		defer func() { scenarioFinishedCh <- struct{}{} }()
 
-		try.Trie(awaitLogon(ctx, sessionsCh)).
-			Proc(scenario).
-			ProcFailure(LogPrintlnErr)
+		session, err := awaitLogon(ctx, sessionsCh)
+		if err != nil {
+			log.Println(err)
+
+			return
+		}
+
+		err = scenario(session)
+		if err != nil {
+			log.Println(err)
+		}
 	}()
 
 	select {
